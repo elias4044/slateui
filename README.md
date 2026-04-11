@@ -140,8 +140,7 @@ slateui/
 │   ├── landing/             # Hero, Nav, Pillars, Comparison, Gallery, CTA
 │   └── docs/                # ContentRenderer, ComponentPreview, LuauHighlighter, previews…
 ├── lib/
-│   └── docs.ts              # All documentation content (typed plain TS, no MDX)
-└── RobloxServices/          # Source Luau files for each service
+│   └── docs.ts              # All documentation content (typed plain TS)
 ```
 
 ---
