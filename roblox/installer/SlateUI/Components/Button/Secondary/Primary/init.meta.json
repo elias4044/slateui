@@ -1,0 +1,21 @@
+{
+  "className": "TextButton",
+  "properties": {
+    "AutoButtonColor": false,
+    "BackgroundColor3": [0.1176, 0.1176, 0.1176],
+    "BorderColor3": [0, 0, 0],
+    "BorderSizePixel": 0,
+    "FontFace": {
+      "family": "rbxassetid://11702779240",
+      "weight": "Regular",
+      "style": "Normal",
+      "cachedFaceId": null
+    },
+    "Position": [[0.1274, 0.0], [0.3153, 0.0]],
+    "Size": [[0.1843, 0.0], [0.1071, 0.0]],
+    "Text": "",
+    "TextColor3": [0, 0, 0],
+    "TextSize": 14,
+    "ZIndex": 191
+  }
+}
