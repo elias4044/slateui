@@ -2,7 +2,7 @@
 
 <br />
 
-<img src="https://raw.githubusercontent.com/elias4044/slateui/main/public/icon.svg" width="64" height="64" alt="SlateUI logo" />
+<img src="https://raw.githubusercontent.com/elias4044/slateui/refs/heads/master/public/icon.svg" width="64" height="64" alt="SlateUI logo" />
 
 <h1>SlateUI</h1>
 
@@ -61,7 +61,7 @@ RouterService.Navigate("MainMenu", "Settings")
 
 ### Plugin (Recommended)
 
-Install from the **Roblox Creator Store** — it automatically places the correct files into `ReplicatedStorage`:
+Install from the **Roblox Creator Store** — it automatically places the correct files into `ReplicatedStorage` and UI Components into `StarterGui`:
 
 **[→ Install SlateUI Plugin](https://create.roblox.com/store/asset/134225039028358/SlateUI-Installer)**
 
@@ -88,7 +88,7 @@ end
 
 ## Docs Site
 
-This repository also contains the full **SlateUI documentation website** — a Next.js 16 app with interactive component previews, Luau syntax highlighting, and live property controllers.
+This repository also contains the full **SlateUI documentation website** — website with interactive component previews, Luau syntax highlighting, and live property controllers.
 
 ### Stack
 
@@ -140,8 +140,7 @@ slateui/
 │   ├── landing/             # Hero, Nav, Pillars, Comparison, Gallery, CTA
 │   └── docs/                # ContentRenderer, ComponentPreview, LuauHighlighter, previews…
 ├── lib/
-│   └── docs.ts              # All documentation content (typed plain TS, no MDX)
-└── RobloxServices/          # Source Luau files for each service
+│   └── docs.ts              # All documentation content (typed plain TS)
 ```
 
 ---

@@ -727,7 +727,7 @@ ProximityService.Init()
     {
       type: "TextSection",
       heading: "GUI Hierarchy Required",
-      body: "Each tagged part must have a BillboardGui child containing two frames: Small (always visible at range) and Expanded (the panel that slides open when near). The service drives Expanded.Size and Expanded.BackgroundTransparency. A pre-made one is available in the SlateUI Services folder under ProximityExample for easy setup.",
+      body: "Each tagged part must have a BillboardGui child containing two frames: Small (always visible at range) and Expanded (the panel that slides open when near). The service drives Expanded.Size and Expanded.BackgroundTransparency. A pre-made one is available in the SlateUI Services folder under Intereaction for easy setup.",
     },
     {
       type: "CodeBlock",
