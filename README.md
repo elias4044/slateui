@@ -25,7 +25,7 @@ Zero globals. Router-driven navigation. Single `require()`.
 
 ## What is SlateUI?
 
-SlateUI is a high-quality UI framework for **Roblox Studio** built around the idea that your UI code should be as clean as the rest of your game. It ships as a single Roblox plugin that injects seven purpose-built Luau services into your project — each one handling a distinct UI concern with zero global state, zero boilerplate.
+SlateUI is a high-quality UI framework for **Roblox Studio** built around the idea that your UI code should be as clean as the rest of your game. It ships as a single Roblox plugin that injects seven purpose-built Luau services into your project — each one handling a distinct UI concern with zero global state, zero boilerplate. It also comes with complete pre-built UI components and penpot design files for easy designing and wireframing.
 
 ```luau
 -- The entire framework, one require()
@@ -69,7 +69,7 @@ Plugin ID: `134225039028358`
 
 ### Manual
 
-Run this once in the Studio **Command Bar**:
+Run this once in the Studio **Command Bar** to install the latest release of SlateUI modules and UI Components:
 
 ```luau
 local InsertService = game:GetService("InsertService")
