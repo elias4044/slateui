@@ -2,11 +2,8 @@
   "name": "slateui",
   "tree": {
     "$className": "DataModel",
-    "ReplicatedStorage": {
-      "$path": "roblox/shared"
-    },
     "ServerStorage": {
-      "$path": "roblox/installer"
+      "$path": "roblox/plugin"
     }
   }
 }

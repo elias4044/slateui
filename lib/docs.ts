@@ -36,10 +36,10 @@ const installationDoc: DocPage = {
       heading: "The Plugin Method (Recommended)",
       body: "The easiest way to install and update SlateUI is via the official Roblox Plugin. It automatically fetches the latest stable release and places the Core and Component folders into their correct directories.",
     },
-      {
-        type: "ComponentPreview",
-        componentId: "install",
-      },
+    {
+      type: "ComponentPreview",
+      componentId: "install",
+    },
     {
       type: "TextSection",
       heading: "Manual Model Injection",
@@ -60,6 +60,30 @@ if success then
     model.SlateUI.Parent = game.ReplicatedStorage
     print("SlateUI Installed Successfully")
 end`,
+    },
+  ],
+};
+
+
+const componentsDoc: DocPage = {
+  slug: "components",
+  title: "UI Components",
+  description: "Pre-built UI components and design resources for SlateUI.",
+  sections: [
+    {
+      type: "TextSection",
+      heading: "Overview",
+      body: "SlateUI comes shipped with countless fully built UI Components, built to scale for every device and compatible with SlateUI's theming system. It includes frames, buttons, cards, inputs, loading screens, menus, notifications, progressbars, sidebars, and text elements.",
+    },
+    {
+      type: "TextSection",
+      heading: "Penpot Design File",
+      body: "SlateUI also comes with a Penpot design file for easy designing and wireframing outside of Roblox Studio. You can use it to mock up your UI rapidly before implementation.\n\n[Download Penpot File](https://penpot.app/)",
+    },
+    {
+      type: "TextSection",
+      heading: "Available Prebuilt Components",
+      body: "The following component categories are available in the SlateUI model:\n\n- **Frames**: Basic structural elements for holding other UI components.\n- **Buttons**: Pre-configured buttons ready to be used with `ButtonService`.\n- **Cards**: Stylized containers for grouping related information.\n- **Inputs**: Text fields, sliders, and switches ready to be bound with `InputsService`.\n- **Loading Screens**: Full-screen layouts configured for `LoadingService`.\n- **Menus**: Navigational layouts for use with `RouterService`.\n- **Notifications**: Toast templates designed for `NotificationService`.\n- **Progressbars**: Status bars compatible with `ProgressBarService`.\n- **Sidebars**: Collapsible or static side navigation panels.\n- **Text**: Standardized text labels with SlateUI typography.",
     },
   ],
 };
@@ -1412,14 +1436,15 @@ local StaminaSettings = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const registry: Record<string, DocPage> = {
-  installation:  installationDoc,
-  button:        buttonDoc,
-  inputs:        inputsDoc,
-  notification:  notificationDoc,
-  progressbar:   progressBarDoc,
-  loading:       loadingDoc,
-  proximity:     proximityDoc,
-  router:        routerDoc,
+  installation: installationDoc,
+  components: componentsDoc,
+  button: buttonDoc,
+  inputs: inputsDoc,
+  notification: notificationDoc,
+  progressbar: progressBarDoc,
+  loading: loadingDoc,
+  proximity: proximityDoc,
+  router: routerDoc,
   cutscene:      cutsceneDoc,
   effects:       effectsDoc,
   subtitles:     subtitlesDoc,
