@@ -224,7 +224,7 @@ export default function Hero() {
               className="mt-12 pt-8 border-t border-[#1E1E1E] flex gap-10"
             >
               {[
-                { value: "7", label: "Services" },
+                { value: "11", label: "Services" },
                 { value: "0", label: "Global variables" },
                 { value: "1", label: "require() to start" },
               ].map(({ value, label }) => (

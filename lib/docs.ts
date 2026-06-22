@@ -1,8 +1,8 @@
-// ─────────────────────────────────────────────────────────────────────────────
+//
 // SlateUI documentation data layer
 // All doc pages are defined here as plain TypeScript objects.
 // Saves a LOT of time. Trust me.
-// ─────────────────────────────────────────────────────────────────────────────
+//
 
 export type PropRow = {
   name: string;
@@ -963,8 +963,473 @@ RouterService.Navigate("Settings", "Audio", {
     },
   ],
 };
+// ─────────────────────────────────────────────────────────────────────────────
+// CutsceneSystem
+// ─────────────────────────────────────────────────────────────────────────────
 
+const cutsceneDoc: DocPage = {
+  slug: "cutscene",
+  title: "CutsceneSystem",
+  description:
+    "A sequence-based cinematic controller. Chain camera movements, dialogues, screen effects, and character animations using a simple step-by-step table structure.",
+  sections: [
+    {
+      type: "TextSection",
+      heading: "Overview",
+      body: "The Cutscene module locks the player's controls, takes over the camera, and processes an ordered sequence of events. Steps can run sequentially (one after another) or in parallel. It handles tweening, yielding, and cleanup automatically, ensuring the player is safely returned to normal gameplay when the sequence concludes.",
+    },
+    {
+      type: "TextSection",
+      heading: "Setup & Dependencies",
+      body: "Place the Cutscene module in ReplicatedStorage. The module is built to seamlessly integrate with the SubtitleSystem and ScreenEffectsModule if they are present. It attempts to load them via safe pcalls:\n\n• Subtitles: ReplicatedStorage.Subtitles.SubtitleSystem\n• Effects: ReplicatedStorage.Effects.ScreenEffectsModule\n\nIf you prefer to load cutscenes by name rather than passing table data directly, store your sequence ModuleScripts in ReplicatedStorage.Cutscenes.CutsceneData.",
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Basic Usage — Inline Sequence",
+      code: `local Cutscene = require(game.ReplicatedStorage.SlateUI.Cutscene)
 
+local sequence = {
+    -- 1. Snap camera to a part and fade in
+    { Type = "SetCamera", CFrame = workspace.CutsceneCams.Cam1.CFrame },
+    { Type = "FadeScreen", Direction = "In", Time = 1 },
+    
+    -- 2. Tween camera to another part over 4 seconds
+    { Type = "MoveCamera", CFrame = workspace.CutsceneCams.Cam2.CFrame, Time = 4 },
+    
+    -- 3. Fade to black
+    { Type = "FadeScreen", Direction = "Out", Time = 1 }
+}
+
+-- Play the cutscene (yields internally but runs asynchronously via task.spawn if needed)
+Cutscene:Play(sequence)`,
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Advanced Usage — Parallel execution, Dialogue, and Events",
+      code: `local Cutscene = require(game.ReplicatedStorage.SlateUI.Cutscene)
+
+Cutscene:Play({
+    { Type = "SetCamera", CFrame = workspace.Cams.Start.CFrame },
+    { Type = "FadeScreen", Direction = "In", Time = 1 },
+    
+    -- Parallel = true means the next step starts IMMEDIATELY alongside this one
+    { 
+        Type = "MoveCamera", 
+        CFrame = workspace.Cams.End.CFrame, 
+        Time = 5, 
+        Parallel = true 
+    },
+    
+    -- This dialogue plays while the camera is still moving
+    { 
+        Type = "Dialogue", 
+        Opt = { 
+            character = "commander", 
+            text = "Target sighted. Moving to intercept.", 
+            duration = 3 
+        } 
+    },
+    
+    { Type = "Wait", Time = 2 },
+    
+    -- Fire a RemoteEvent to tell the server to spawn enemies
+    { 
+        Type = "FireEvent", 
+        Event = game.ReplicatedStorage.Events.SpawnEnemies, 
+        Args = { "Sector7" } 
+    },
+    
+    -- Trigger a screen shake effect from the Effects module
+    { 
+        Type = "Effect", 
+        Effect = "Shake", 
+        Args = { 1, 15 } -- Duration 1s, Intensity 15
+    },
+    
+    { Type = "FadeScreen", Direction = "Out", Time = 1 }
+})`,
+    },
+    {
+      type: "TextSection",
+      heading: "Character Manipulation",
+      body: "You can move NPCs or the player's character during a cutscene using the `MoveCharacter` and `AnimateCharacter` steps. MoveCharacter supports both physical walking (via Humanoid:MoveTo) and Tweening.",
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Walking and Animating NPCs",
+      code: `local npc = workspace.NPCs.Guard
+
+local seq = {
+    -- Walk the NPC to a part
+    { 
+        Type = "MoveCharacter", 
+        Character = npc, 
+        Position = workspace.Waypoints.Door.Position, 
+        Method = "Walk", 
+        Speed = 16,
+        Timeout = 5 -- Skip if they get stuck for 5 seconds
+    },
+    -- Turn NPC to face the player
+    { 
+        Type = "MoveCharacter", 
+        Character = npc, 
+        Face = game.Players.LocalPlayer.Character.PrimaryPart 
+    },
+    -- Play an animation track
+    { 
+        Type = "AnimateCharacter", 
+        Character = npc, 
+        AnimationId = "rbxassetid://1234567890" 
+    }
+}
+Cutscene:Play(seq)`,
+    },
+    {
+      type: "PropTable",
+      heading: "API — Step Types & Properties",
+      rows: [
+        {
+          name: "SetCamera / MoveCamera",
+          type: "Step",
+          default: "—",
+          description: "Requires a `CFrame` property. `MoveCamera` also requires `Time` (number) to dictate the tween duration.",
+        },
+        {
+          name: "AttachCamera / DetachCamera",
+          type: "Step",
+          default: "—",
+          description: "Attaches the camera to a `Target` (BasePart or Attachment) on RenderStepped. Optional `Offset` (CFrame). Use `DetachCamera` to stop tracking.",
+        },
+        {
+          name: "Dialogue",
+          type: "Step",
+          default: "—",
+          description: "Passes the `Opt` (table) property directly to `SubtitleSystem:Show()`. Skips if Subtitles module is absent.",
+        },
+        {
+          name: "Effect",
+          type: "Step",
+          default: "—",
+          description: "Requires `Effect` (string, e.g., 'Shake', 'Glitch'). Passes `Args` (array) or `Time` to the ScreenEffects module.",
+        },
+        {
+          name: "MoveCharacter",
+          type: "Step",
+          default: "—",
+          description: "Requires `Character` (Model). Accepts `Position` (Vector3/BasePart), `Method` ('Walk' or 'Tween'), `Speed`, `Face` (Vector3/BasePart), and `Timeout`.",
+        },
+        {
+          name: "FireEvent",
+          type: "Step",
+          default: "—",
+          description: "Fires a RemoteEvent or BindableEvent provided in `Event`. Passes the array provided in `Args`.",
+        },
+        {
+          name: "Run",
+          type: "Step",
+          default: "—",
+          description: "Executes a custom function provided in `Action`. If the function returns a Tween or Signal, the step will yield until completion.",
+        },
+      ],
+    },
+  ],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ScreenEffectsModule
+// ─────────────────────────────────────────────────────────────────────────────
+
+const effectsDoc: DocPage = {
+  slug: "effects",
+  title: "ScreenEffectsModule",
+  description:
+    "A powerful screen effects system. Apply blurs, glitches, camera shakes, and color tints with single function calls.",
+  sections: [
+    {
+      type: "TextSection",
+      heading: "Overview",
+      body: "The Effects module dynamically creates necessary GUI elements (like full-screen frames and ImageLabels) and Lighting instances (BlurEffects) on the fly. It is entirely client-side and automatically handles Z-indexing and cleanup.",
+    },
+    {
+      type: "TextSection",
+      heading: "Setup",
+      body: "No manual GUI setup is required! The module automatically constructs a `ScreenEffectsGui` inside the LocalPlayer's `PlayerGui` the first time an effect is called. It uses `RunService.RenderStepped` for high-performance visual loops.",
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Basic Usage",
+      code: `local Effects = require(game.ReplicatedStorage.Effects.ScreenEffectsModule)
+
+-- Fade out to black over 2 seconds
+Effects:FadeIn(2)
+
+task.wait(2)
+
+-- Fade back to clear over 2 seconds
+Effects:FadeOut(2)`,
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Advanced Usage — Combining Effects",
+      code: `local Effects = require(game.ReplicatedStorage.Effects.ScreenEffectsModule)
+
+-- Taking damage effect
+local function onDamageTaken()
+    -- Flash red quickly
+    Effects:Strobe(0.5, Color3.fromRGB(255, 0, 0), 0.1)
+    
+    -- Shake the screen intensely for 0.3 seconds
+    Effects:Shake(0.3, 15)
+    
+    -- Add a short glitch overlay to disorient the player
+    Effects:Glitch(0.4, 8)
+end`,
+    },
+    {
+      type: "PropTable",
+      heading: "API Methods",
+      rows: [
+        {
+          name: "Effects:FadeIn(duration)",
+          type: "Method",
+          default: "duration: 1",
+          description: "Tweens a full-screen black overlay from transparent to opaque.",
+        },
+        {
+          name: "Effects:FadeOut(duration)",
+          type: "Method",
+          default: "duration: 1",
+          description: "Tweens the full-screen black overlay from opaque to transparent.",
+        },
+        {
+          name: "Effects:Blink(duration, color)",
+          type: "Method",
+          default: "dur: 1, col: White",
+          description: "Quickly fades a colored overlay in and out over the specified duration.",
+        },
+        {
+          name: "Effects:Glitch(duration, intensity)",
+          type: "Method",
+          default: "dur: 0.5, int: 5",
+          description: "Overlays a jittering noise texture (rbxassetid://13754189844) over the screen.",
+        },
+        {
+          name: "Effects:Shake(duration, intensity)",
+          type: "Method",
+          default: "dur: 0.5, int: 10",
+          description: "Shakes the UI overlay layer randomly. Note: This simulates screen shake via 2D GUI offset, making it safe to use alongside locked 3D cameras.",
+        },
+        {
+          name: "Effects:Tint(color, duration, intensity)",
+          type: "Method",
+          default: "dur: 1, int: 0.5",
+          description: "Applies a persistent translucent colored overlay over the screen.",
+        },
+        {
+          name: "Effects:Flicker(duration, min, max, speed)",
+          type: "Method",
+          default: "min: 0.3, max: 0.7, spd: 0.05",
+          description: "Randomly modulates the transparency of a black overlay to simulate a flickering light/camera.",
+        },
+        {
+          name: "Effects:Strobe(duration, color, speed)",
+          type: "Method",
+          default: "dur: 1, col: Red, spd: 0.1",
+          description: "Harshly flashes a solid color on and off at a fixed interval. Great for alarms/warnings.",
+        },
+        {
+          name: "Effects:Blur(intensity, duration)",
+          type: "Method",
+          default: "int: 24, dur: 1",
+          description: "Tweens a Lighting BlurEffect. Set intensity to 0 to remove the blur.",
+        },
+      ],
+    },
+  ],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SubtitleSystem
+// ─────────────────────────────────────────────────────────────────────────────
+
+const subtitlesDoc: DocPage = {
+  slug: "subtitles",
+  title: "SubtitleSystem",
+  description:
+    "A cinematic subtitle manager featuring a character registry, typewriter text effects, color-coded names, and synced voice blips.",
+  sections: [
+    {
+      type: "TextSection",
+      heading: "Overview",
+      body: "Subtitles can be displayed manually or triggered automatically via the Cutscene module. By utilizing the Character Registry, you can define an NPC's display name, text color, and talking sound once, and the system will automatically format all of their lines.",
+    },
+    {
+      type: "TextSection",
+      heading: "GUI Hierarchy Requirements",
+      body: "This module expects a specific GUI structure to exist in the player's PlayerGui. Ensure you have the following hierarchy created:\n\n`PlayerGui`\n └─ `SubtitleGui` (ScreenGui)\n      └─ `SubtitleContainer` (Frame)\n           └─ `SubtitleLabel` (TextLabel, with RichText enabled)",
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Global Configuration",
+      code: `local Subtitles = require(game.ReplicatedStorage.Subtitles.SubtitleSystem)
+
+-- You can mutate the global config table at runtime to fit your game's pacing
+Subtitles.Config.TypeSpeed = 0.05        -- Seconds between each character in typewriter mode
+Subtitles.Config.FadeTime = 0.3          -- UI fade in/out duration
+Subtitles.Config.BackgroundOpacity = 0.6 -- How dark the container frame gets
+Subtitles.Config.UseTypewriter = true    -- Default typewriter state for all subtitles`,
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Registering Characters",
+      code: `Subtitles:RegisterCharacter("commander", {
+    Name = "Cmdr. Shepard",
+    Color = Color3.fromRGB(56, 189, 248),
+    SoundId = "rbxassetid://123456789" -- Short blip sound played on reveal
+})
+
+Subtitles:RegisterCharacter("ai", {
+    Name = "SYSTEM",
+    Color = Color3.fromRGB(239, 68, 68),
+    SoundId = "rbxassetid://987654321"
+})`,
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Showing Subtitles & Using Callbacks",
+      code: `-- Simple usage
+Subtitles:Show({
+    character = "commander",
+    text = "We need to move, now!",
+    duration = 3
+})
+
+-- Advanced usage with a callback when the subtitle finishes reading
+Subtitles:Show({
+    character = "ai",
+    text = "WARNING: Core temperature critical.",
+    duration = 4,
+    typewriter = true,
+    onComplete = function()
+        print("Subtitle finished! Trigger explosion here.")
+    end
+})`,
+    },
+    {
+      type: "PropTable",
+      heading: "Show() Options Dictionary",
+      rows: [
+        {
+          name: "text",
+          type: "string",
+          default: '""',
+          description: "The line of dialogue to display. HTML tags are stripped during character counting.",
+        },
+        {
+          name: "character",
+          type: "string",
+          default: "nil",
+          description: "The ID of a pre-registered character to fetch Name, Color, and SoundId from.",
+        },
+        {
+          name: "duration",
+          type: "number",
+          default: "2",
+          description: "Time in seconds to keep the subtitle on screen after typing finishes.",
+        },
+        {
+          name: "typewriter",
+          type: "boolean",
+          default: "Config default",
+          description: "Overrides the global UseTypewriter config for this specific line.",
+        },
+        {
+          name: "speaker / speakerColor",
+          type: "string / Color3",
+          default: "nil",
+          description: "Allows you to bypass the registry and provide a one-off speaker name and color.",
+        },
+        {
+          name: "onComplete",
+          type: "function",
+          default: "nil",
+          description: "Task spawned when the subtitle duration ends and the fade-out begins.",
+        },
+      ],
+    },
+  ],
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Camera+
+// ─────────────────────────────────────────────────────────────────────────────
+
+const cameraPlusDoc: DocPage = {
+  slug: "cameraplus",
+  title: "Camera+",
+  description:
+    "An advanced first-person camera controller with dynamic FOV scaling, directional movement speeds, and an integrated stamina & exhaustion blur system.",
+  sections: [
+    {
+      type: "TextSection",
+      heading: "Overview",
+      body: "Camera+ is a drop-in LocalScript replacement for the default Roblox camera. It forces a highly immersive first-person perspective by overriding the `CurrentCamera` to `Scriptable` mode. It features dynamic Field of View transitions based on movement state, smooth head-bobbing calculations, and a fully integrated stamina system.",
+    },
+    {
+      type: "TextSection",
+      heading: "Installation & Setup",
+      body: "Because Camera+ completely overrides core Roblox camera and control mechanics on every RenderStepped frame, it **must** be placed in `StarterPlayerScripts` as a `LocalScript`. \n\nNo external modules are required. By default, it expects the character to have a `Humanoid` and `HumanoidRootPart`.",
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Configuration: Movement & FOV",
+      code: `-- Found at the top of the Camera+ script
+local walkspeeds = {
+    enabled = true,
+    walkingspeed = 12,        -- Default W key speed
+    backwardsspeed = 10,      -- S key speed
+    sidewaysspeed = 15,       -- A / D key speed
+    diagonalspeed = 16,       -- W+A / W+D speed
+    runningspeed = 20,        -- LShift speed
+    runningFOV = 76,          -- FOV widens for a sense of speed
+}`,
+    },
+    {
+      type: "CodeBlock",
+      language: "luau",
+      caption: "Configuration: Stamina & Exhaustion",
+      code: `-- The stamina system physically restricts running and applies screen effects
+local StaminaSettings = {
+    enabled = true,
+    maxStamina = 100,
+    drainRate = 10,           -- Stamina lost per second of running
+    regenRate = 12.5,         -- Stamina gained per second walking/idle
+    recoveryLimit = 25,       -- Stamina needed before you are allowed to run again
+    blurThreshold = 20,       -- When stamina drops below this, blur begins
+    maxBlur = 32,             -- The maximum intensity of the Lighting.BlurEffect
+}`,
+    },
+    {
+      type: "TextSection",
+      heading: "Multi-Platform Support",
+      body: "Camera+ is cross-platform ready out of the box:\n\n• **PC:** Mouse movement is tied to delta capture. The `F` key toggles mouse freedom (configurable via `CanToggleMouse`).\n• **Gamepad:** Bound to Thumbstick2 with a hardcoded `deadzone` of `0.1` to prevent controller drift. `X` and `Y` axes are correctly clamped.\n• **Mobile / Touch:** Delta swipes are normalized across screen space for smooth turning.",
+    },
+    {
+      type: "TextSection",
+      heading: "Body Visibility & Transparency",
+      body: "The script runs an internal `updatechar()` loop. If `CanViewBody` is set to `true`, the script hides only the character's Head and accessories while keeping the torso and limbs visible. If set to `false`, it sets the `LocalTransparencyModifier` of the entire character to 1, acting as a pure floating camera.",
+    },
+  ],
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Registry — add new doc pages here
@@ -980,6 +1445,10 @@ const registry: Record<string, DocPage> = {
   loading: loadingDoc,
   proximity: proximityDoc,
   router: routerDoc,
+  cutscene:      cutsceneDoc,
+  effects:       effectsDoc,
+  subtitles:     subtitlesDoc,
+  cameraplus:    cameraPlusDoc,
 };
 
 export function getDocBySlug(slug: string): DocPage | null {
