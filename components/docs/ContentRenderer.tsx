@@ -1,6 +1,7 @@
 import type { DocSection } from "@/lib/docs";
 import ComponentPreview from "@/components/docs/ComponentPreview";
 import { LuauHighlighter } from "@/components/docs/LuauHighlighter";
+import ReactMarkdown from "react-markdown";
 
 export default function ContentRenderer({ sections }: { sections: DocSection[] }) {
   return (
@@ -39,7 +40,32 @@ function TextSection({
           {heading}
         </h2>
       )}
-      <p className="text-slate-400 leading-7 text-[15px] max-w-prose">{body}</p>
+      <div className="text-slate-400 leading-7 text-[15px] max-w-prose space-y-4">
+        <ReactMarkdown
+          components={{
+            a: ({ node, ...props }) => <a className="text-violet-400 hover:text-violet-300 underline underline-offset-4" target="_blank" rel="noopener noreferrer" {...props} />,
+            strong: ({ node, ...props }) => <strong className="font-semibold text-slate-200" {...props} />,
+            ul: ({ node, ...props }) => <ul className="list-disc pl-5 space-y-2 my-4" {...props} />,
+            ol: ({ node, ...props }) => <ol className="list-decimal pl-5 space-y-2 my-4" {...props} />,
+            li: ({ node, ...props }) => <li className="pl-1" {...props} />,
+            code: ({ node, className, children, ...props }) => {
+              const match = /language-(\w+)/.exec(className || '');
+              return !match ? (
+                <code className="px-1.5 py-0.5 rounded-md bg-[#1E1E1E] text-slate-300 font-mono text-sm" {...props}>
+                  {children}
+                </code>
+              ) : (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
+            p: ({ node, ...props }) => <p className="leading-7" {...props} />
+          }}
+        >
+          {body}
+        </ReactMarkdown>
+      </div>
     </section>
   );
 }
