@@ -78,7 +78,7 @@ const componentsDoc: DocPage = {
     {
       type: "TextSection",
       heading: "Penpot Design File",
-      body: "SlateUI also comes with a Penpot design file for easy designing and wireframing outside of Roblox Studio. You can use it to mock up your UI rapidly before implementation.\n\n[Download Penpot File](https://penpot.app/)",
+      body: "SlateUI also comes with a Penpot design file for easy designing and wireframing outside of Roblox Studio. You can use it to mock up your UI rapidly before implementation.\n\n[Download Penpot File](https://github.com/elias4044/slateui/releases/download/1.1.0/SlateUI.penpot)",
     },
     {
       type: "TextSection",
